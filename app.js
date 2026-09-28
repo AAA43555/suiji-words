@@ -17,6 +17,21 @@ const state = {
   editingId: null
 };
 let toastTimer;
+let wordLexicon = null;
+
+async function loadWordLexicon() {
+  if (wordLexicon) return wordLexicon;
+  const fallback = ["apple", "beautiful", "because", "different", "education", "example", "favorite", "language", "progress", "serendipity", "vivid"];
+  try {
+    const response = await fetch("./data/words.txt", { cache: "force-cache" });
+    if (!response.ok) throw new Error("word list unavailable");
+    const words = (await response.text()).split(/\s+/).map(word => word.trim().toLowerCase()).filter(word => /^[a-z]{2,32}$/.test(word));
+    wordLexicon = new Set([...words, ...fallback]);
+  } catch {
+    wordLexicon = new Set(fallback);
+  }
+  return wordLexicon;
+}
 
 function loadCards() {
   try {
@@ -224,6 +239,52 @@ async function canvasToBlob(canvas) {
   return new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Frame capture failed")), "image/png"));
 }
 
+async function makeHandwritingVariants(source) {
+  const variants = [];
+  const marginX = Math.round(source.width * 0.035);
+  const marginY = Math.round(source.height * 0.035);
+  const cropW = source.width - marginX * 2;
+  const cropH = source.height - marginY * 2;
+  const scale = Math.min(2.2, Math.max(1.25, 1800 / Math.max(cropW, cropH)));
+  const width = Math.round(cropW * scale);
+  const height = Math.round(cropH * scale);
+  const base = document.createElement("canvas");
+  base.width = width;
+  base.height = height;
+  const ctx = base.getContext("2d", { willReadFrequently: true });
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(source, marginX, marginY, cropW, cropH, 0, 0, width, height);
+  variants.push(await canvasToBlob(base));
+  const image = ctx.getImageData(0, 0, width, height);
+  const processed = new ImageData(width, height);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const p = y * width + x;
+      let local = 0;
+      let count = 0;
+      for (let yy = Math.max(0, y - 8); yy <= Math.min(height - 1, y + 8); yy += 4) {
+        for (let xx = Math.max(0, x - 8); xx <= Math.min(width - 1, x + 8); xx += 4) {
+          const q = (yy * width + xx) * 4;
+          local += image.data[q] * 0.299 + image.data[q + 1] * 0.587 + image.data[q + 2] * 0.114;
+          count++;
+        }
+      }
+      const q = p * 4;
+      const luminance = image.data[q] * 0.299 + image.data[q + 1] * 0.587 + image.data[q + 2] * 0.114;
+      const ink = luminance < local / count - 8 ? 22 : 247;
+      processed.data[q] = ink;
+      processed.data[q + 1] = ink;
+      processed.data[q + 2] = ink;
+      processed.data[q + 3] = 255;
+    }
+  }
+  ctx.putImageData(processed, 0, 0);
+  variants.push(await canvasToBlob(base));
+  base.width = 0;
+  base.height = 0;
+  return variants;
+}
+
 async function recognizeFrame() {
   if (!state.stream || state.recognizing) return;
   const video = $("#camera-video");
@@ -244,20 +305,32 @@ async function recognizeFrame() {
   stopCamera();
   let worker;
   try {
-    const blob = await canvasToBlob(canvas);
+    const variants = await makeHandwritingVariants(canvas);
     canvas.width = 0;
     canvas.height = 0;
     $("#ocr-status").textContent = "首次使用需下载识别模型，请稍等…";
     const tesseract = await loadTesseract();
     worker = await tesseract.createWorker(["eng", "chi_sim"], 1, {
       logger: event => {
-        if (event.status === "recognizing text") {
-          $("#ocr-status").textContent = `正在识别文字 ${Math.round((event.progress || 0) * 100)}%`;
+        if (event.status === "recognizing text" && event.progress != null) {
+          $("#ocr-status").textContent = "正在增强识别 " + Math.round((event.progress || 0) * 100) + "%";
         }
       }
     });
-    const { data } = await worker.recognize(blob);
-    state.candidates = parseOcrText(data.text);
+    const lexicon = await loadWordLexicon();
+    const candidates = [];
+    for (const [index, variant] of variants.entries()) {
+      await worker.setParameters({ tessedit_pageseg_mode: ["6", "11"][index], preserve_interword_spaces: "1" });
+      const { data } = await worker.recognize(variant);
+      candidates.push(...parseOcrText(data.text, lexicon));
+    }
+    const seen = new Set();
+    state.candidates = candidates.filter(candidate => {
+      const key = candidate.word.toLocaleLowerCase().replace(/\s+/g, " ");
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 40);
     navigate("confirm");
     if (!state.candidates.length) toast("未找到清晰的英文单词，可以手动补充");
   } catch (error) {

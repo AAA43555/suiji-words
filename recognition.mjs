@@ -11,7 +11,38 @@ export function entryType(text) {
   return "单词";
 }
 
-export function parseOcrText(text) {
+export function levenshtein(a, b) {
+  const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let diagonal = row[0];
+    row[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const above = row[j];
+      row[j] = Math.min(row[j] + 1, row[j - 1] + 1, diagonal + (a[i - 1] === b[j - 1] ? 0 : 1));
+      diagonal = above;
+    }
+  }
+  return row[b.length];
+}
+
+export function correctWord(word, lexicon) {
+  const value = word.toLowerCase();
+  if (!lexicon || !value || !/^[a-z]+$/.test(value)) return word;
+  if (lexicon.has(value)) return word;
+  let best = word;
+  let bestDistance = 3;
+  for (const candidate of lexicon) {
+    if (Math.abs(candidate.length - value.length) > 2) continue;
+    const distance = levenshtein(value, candidate);
+    if (distance < bestDistance || (distance === bestDistance && candidate.length === value.length)) {
+      best = candidate;
+      bestDistance = distance;
+    }
+  }
+  return bestDistance <= 2 ? best : word;
+}
+
+export function parseOcrText(text, lexicon = null) {
   const lines = text.split(/\r?\n/).map(line => line.replace(/[|•·]/g, " ").replace(/^\s*\d+[.)、]\s*/, "").trim()).filter(Boolean);
   const result = [];
   for (const line of lines) {
@@ -29,6 +60,10 @@ export function parseOcrText(text) {
       }
     }
     front = front.replace(/[-—–:：\s]+$/, "").trim();
+    if (/^[A-Za-z0-9]+$/.test(front)) {
+      const normalized = front.toLowerCase().replace(/0/g, "o").replace(/1/g, "i").replace(/3/g, "e").replace(/5/g, "s").replace(/7/g, "t");
+      front = correctWord(normalized, lexicon);
+    }
     if (!validEntry(front) || /^(page|date|unit|word|meaning)$/i.test(front)) continue;
     result.push({ word: front, meaning: meaning.slice(0, 500) });
   }
