@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#e9f6f2">
+  <meta name="description" content="扫描手写单词本，校对后做成随身单词卡，按遗忘曲线复习。">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <title>随记单词</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">记</span><span>随记单词<small>把手写本装进口袋</small></span></div>
+      <button class="icon-btn" id="open-settings" aria-label="设置与备份" title="设置与备份">⚙</button>
+    </header>
+
+    <main id="main">
+      <section class="page active" id="page-home" aria-labelledby="home-heading">
+        <div class="eyebrow" id="today-label">今天</div>
+        <h1 id="home-heading">背一点，<br><em>就记得更久。</em></h1>
+        <p class="lead">从纸上抄下来，留在随身的记忆里。</p>
+        <div class="hero-card">
+          <div class="hero-orb" aria-hidden="true"><span>✦</span></div>
+          <span class="pill">今日计划</span>
+          <div class="hero-count"><strong id="due-count">0</strong><span>张待复习</span></div>
+          <p id="due-caption">新的一页，从第一个单词开始。</p>
+          <button class="primary-button dark" id="start-review">开始复习 <span aria-hidden="true">↗</span></button>
+        </div>
+        <div class="section-heading"><h2>快速开始</h2><span>随记 · 随背</span></div>
+        <div class="quick-grid">
+          <button class="quick-card scan-card" data-nav="scan"><span class="quick-icon">▧</span><strong>扫描单词本</strong><small>对准纸页，直接识别</small><span class="quick-arrow">↗</span></button>
+          <button class="quick-card add-card" id="home-add"><span class="quick-icon">＋</span><strong>手动记一词</strong><small>想到什么，马上记下</small><span class="quick-arrow">↗</span></button>
+        </div>
+        <div class="privacy-note"><span aria-hidden="true">◈</span><div><strong>扫描照片不会保存到相册</strong><small>画面仅在浏览器内存中用于识别；只保存你确认过的文字。</small></div></div>
+      </section>
+
+      <section class="page" id="page-scan" aria-labelledby="scan-heading">
+        <div class="page-head"><span class="eyebrow">01 / 捕捉纸上的单词</span><h1 id="scan-heading">扫描单词本</h1><p>把字放在框内，保持光线充足。识别后可以逐条校对。</p></div>
+        <div class="camera-panel">
+          <video id="camera-video" autoplay muted playsinline></video>
+          <div class="camera-empty" id="camera-empty"><span class="camera-symbol">▧</span><strong>准备好就打开摄像头</strong><small>我们不会拍照或保存相片</small></div>
+          <div class="scan-guide" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          <div class="camera-badge">仅在此设备识别</div>
+        </div>
+        <div class="scan-actions">
+          <button class="primary-button" id="camera-action">打开摄像头</button>
+          <button class="text-button" id="camera-close" hidden>关闭摄像头</button>
+        </div>
+        <div class="progress-line" id="ocr-progress" hidden><div class="spinner"></div><span id="ocr-status">正在识别…</span></div>
+        <div class="info-card"><span class="info-icon">◎</span><p><strong>关于手写识别</strong>潦草字迹、反光或中英混排可能识别不准。下一步请核对单词和释义；也可以手动补充。</p></div>
+      </section>
+
+      <section class="page" id="page-confirm" aria-labelledby="confirm-heading">
+        <div class="page-head"><span class="eyebrow">02 / 校对并收藏</span><h1 id="confirm-heading">确认识别结果</h1><p>只有点「加入词库」后，文字才会保存。</p></div>
+        <div class="result-toolbar"><span id="result-count">0 个候选词</span><button class="text-button" id="add-result">＋ 添加一行</button></div>
+        <div id="results-list" class="results-list"></div>
+        <button class="primary-button sticky-action" id="save-results">加入词库 <span aria-hidden="true">→</span></button>
+      </section>
+
+      <section class="page" id="page-deck" aria-labelledby="deck-heading">
+        <div class="page-head"><span class="eyebrow">你的随身单词本</span><h1 id="deck-heading">我的词库<span class="heading-count" id="total-count">0</span></h1><p>每个单词都有自己的下次见面时间。</p></div>
+        <label class="search-field"><span aria-hidden="true">⌕</span><input id="search-input" type="search" placeholder="搜索单词或释义" autocomplete="off"></label>
+        <div class="deck-actions"><button class="soft-button" id="deck-add">＋ 手动添加</button><button class="soft-button" data-nav="scan">▧ 扫描添加</button></div>
+        <div id="word-list" class="word-list"></div>
+      </section>
+
+      <section class="page" id="page-study" aria-labelledby="study-heading">
+        <div class="page-head study-head"><span class="eyebrow" id="study-progress-text">今日复习</span><h1 id="study-heading">想起来了吗？</h1><p>先在心里回忆，再翻开答案。</p></div>
+        <div class="study-progress"><div id="study-progress-fill"></div></div>
+        <div class="flashcard" id="flashcard"><div class="flashcard-label">WORD CARD · 正面</div><div class="flashcard-word" id="flashcard-word"></div><div class="flashcard-hint" id="flashcard-hint">轻点下方按钮查看释义</div><div class="flashcard-decoration" aria-hidden="true">✳</div></div>
+        <button class="primary-button" id="flip-card">翻开答案</button>
+        <div class="rating-wrap" id="rating-wrap" hidden><p>这次记得怎么样？</p><div class="rating-grid"><button data-grade="again"><strong>忘记了</strong><small>10 分钟后</small></button><button data-grade="hard"><strong>有点模糊</strong><small>明天再看</small></button><button data-grade="good"><strong>记得很牢</strong><small>延长间隔</small></button></div></div>
+        <button class="text-button study-exit" data-nav="home">结束本次复习</button>
+      </section>
+
+      <section class="page" id="page-settings" aria-labelledby="settings-heading">
+        <div class="page-head"><span class="eyebrow">数据与说明</span><h1 id="settings-heading">设置与备份</h1><p>你的词卡只存在当前浏览器。换手机前，请先导出备份。</p></div>
+        <div class="settings-card"><span class="settings-icon">⇩</span><div><strong>导出词库备份</strong><small>下载包含单词和复习进度的 JSON 文件</small></div><button class="soft-button" id="export-data">导出</button></div>
+        <div class="settings-card"><span class="settings-icon">⇧</span><div><strong>导入词库备份</strong><small>与现有单词合并，同名词会保留原卡</small></div><button class="soft-button" id="import-data">导入</button><input id="import-file" type="file" accept="application/json,.json" hidden></div>
+        <div class="info-card settings-info"><span class="info-icon">◎</span><p><strong>隐私与识别</strong>摄像头画面不上传，也不保存为照片。OCR 在本机运行，首次识别需联网下载识别模型；浏览器可能缓存模型文件。清除网站数据会删除词卡，请定期备份。</p></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="主导航">
+      <button data-nav="home" class="nav-item active"><span>⌂</span><small>今日</small></button>
+      <button data-nav="scan" class="nav-item"><span>▧</span><small>扫描</small></button>
+      <button data-nav="deck" class="nav-item"><span>▤</span><small>词库</small></button>
+    </nav>
+  </div>
+
+  <dialog id="word-dialog" class="word-dialog">
+    <form id="word-form" method="dialog">
+      <div class="dialog-head"><div><span class="eyebrow">随手记一词</span><h2 id="dialog-title">添加单词</h2></div><button type="button" class="icon-btn" id="close-dialog" aria-label="关闭">×</button></div>
+      <label>英文单词<input id="word-input" required autocomplete="off" autocapitalize="none" placeholder="serendipity"></label>
+      <label>中文释义<input id="meaning-input" autocomplete="off" placeholder="意外的美好发现"></label>
+      <label>例句或笔记（可选）<textarea id="note-input" rows="3" placeholder="写下让你记住它的句子"></textarea></label>
+      <div class="dialog-actions"><button type="button" class="delete-button" id="delete-word" hidden>删除卡片</button><button type="submit" class="primary-button">保存单词卡</button></div>
+    </form>
+  </dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js" type="module"></script>
+</body>
+</html>

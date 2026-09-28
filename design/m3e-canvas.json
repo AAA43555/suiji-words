@@ -1,0 +1,50 @@
+{
+  "title": "随记单词",
+  "brief": "用手机摄像头识别手写单词本，校对后生成单词卡，并按间隔复习。扫描帧只在浏览器内存中处理，不保存到相册。",
+  "frame": "phone",
+  "platform": "web",
+  "paletteKey": "teal",
+  "theme": { "dark": false, "bothModes": true, "contrast": "standard", "shape": "rounded", "font": "system", "emphasized": true, "motion": "expressive" },
+  "frames": [
+    { "id": "home", "name": "今日", "x": 0, "y": 0, "note": "展示今日待复习数量与扫描入口，提示数据只保存在本机浏览器。" },
+    { "id": "scan", "name": "扫描单词本", "x": 492, "y": 0, "note": "调用网页实时摄像头，仅提取当前画面帧做本地识别，不创建相册照片。" },
+    { "id": "confirm", "name": "校对识别结果", "x": 984, "y": 0, "note": "逐条修改英文单词和中文释义，确认后才加入词库。" },
+    { "id": "deck", "name": "我的词库", "x": 1476, "y": 0, "note": "搜索、编辑和管理已保存的单词卡。" },
+    { "id": "study", "name": "开始复习", "x": 1968, "y": 0, "note": "先回忆再翻卡，按忘记、模糊、记得安排下次复习。" }
+  ],
+  "groups": [
+    { "id": "hbar", "x": 0, "y": 0, "axis": "x", "items": [{ "id": "hbar-item", "kind": "topAppBar", "label": "随记单词", "icon": null, "variant": "filled" }] },
+    { "id": "hhello", "x": 16, "y": 112, "axis": "x", "items": [{ "id": "hhello-item", "kind": "text", "label": "今天，背一点就好", "icon": null, "variant": "filled", "size": 28, "bold": true }] },
+    { "id": "hdue", "x": 16, "y": 172, "axis": "x", "items": [{ "id": "hdue-item", "kind": "card", "label": "今日待复习 12 张", "supporting": "先回忆，再翻卡；按掌握程度安排下一次。", "icon": "style", "variant": "filled", "noImage": true, "size": 380, "size2": 170, "action": { "to": "study", "transition": "slide" } }] },
+    { "id": "hscan", "x": 16, "y": 368, "axis": "x", "items": [{ "id": "hscan-item", "kind": "button", "label": "扫描手写单词本", "icon": "document_scanner", "variant": "filled", "size": 380, "action": { "to": "scan", "transition": "slide" } }] },
+    { "id": "hprivacy", "x": 16, "y": 450, "axis": "x", "items": [{ "id": "hprivacy-item", "kind": "listItem", "label": "不保存扫描照片", "supporting": "只保存你确认过的单词文字", "icon": "privacy_tip", "variant": "filled" }] },
+    { "id": "hnav", "x": 0, "y": 788, "axis": "x", "items": [{ "id": "hnav-item", "kind": "bottomNav", "label": "", "icon": null, "variant": "filled", "tabs": [{ "icon": "today", "label": "今日" }, { "icon": "document_scanner", "label": "扫描" }, { "icon": "auto_stories", "label": "词库" }], "selected": 0, "actions": { "tab:1": { "to": "scan", "transition": "fade" }, "tab:2": { "to": "deck", "transition": "fade" } } }] },
+
+    { "id": "sbar", "x": 492, "y": 0, "axis": "x", "items": [{ "id": "sbar-item", "kind": "topAppBar", "label": "扫描单词本", "icon": "arrow_back", "variant": "filled", "actions": { "icon": { "to": "home", "transition": "slide" } } }] },
+    { "id": "scamera", "x": 508, "y": 112, "axis": "x", "items": [{ "id": "scamera-item", "kind": "camera", "label": "", "icon": null, "variant": "filled", "size": 380, "size2": 430 }] },
+    { "id": "shint", "x": 508, "y": 560, "axis": "x", "items": [{ "id": "shint-item", "kind": "text", "label": "对准单词本，保持光线充足", "icon": null, "variant": "filled", "size": 18 }] },
+    { "id": "sbutton", "x": 508, "y": 622, "axis": "x", "items": [{ "id": "sbutton-item", "kind": "button", "label": "识别当前画面", "icon": "center_focus_strong", "variant": "filled", "size": 380, "action": { "to": "confirm", "transition": "slide" }, "note": "只读取摄像头当前帧到内存。识别完成就丢弃图像，不保存照片。" }] },
+    { "id": "snav", "x": 492, "y": 788, "axis": "x", "items": [{ "id": "snav-item", "kind": "bottomNav", "label": "", "icon": null, "variant": "filled", "tabs": [{ "icon": "today", "label": "今日" }, { "icon": "document_scanner", "label": "扫描" }, { "icon": "auto_stories", "label": "词库" }], "selected": 1, "actions": { "tab:0": { "to": "home", "transition": "fade" }, "tab:2": { "to": "deck", "transition": "fade" } } }] },
+
+    { "id": "cbar", "x": 984, "y": 0, "axis": "x", "items": [{ "id": "cbar-item", "kind": "topAppBar", "label": "校对识别结果", "icon": "arrow_back", "variant": "filled", "actions": { "icon": { "to": "scan", "transition": "slide" } } }] },
+    { "id": "ctip", "x": 1000, "y": 110, "axis": "x", "items": [{ "id": "ctip-item", "kind": "text", "label": "确认每个单词，再加入词库", "icon": null, "variant": "filled", "size": 22, "bold": true }] },
+    { "id": "cword1", "x": 1000, "y": 178, "axis": "x", "items": [{ "id": "cword1-item", "kind": "textField", "label": "英文单词 · serendipity", "icon": null, "variant": "outlined" }] },
+    { "id": "cmeaning1", "x": 1000, "y": 252, "axis": "x", "items": [{ "id": "cmeaning1-item", "kind": "textField", "label": "中文释义 · 意外的美好发现", "icon": null, "variant": "outlined" }] },
+    { "id": "cword2", "x": 1000, "y": 348, "axis": "x", "items": [{ "id": "cword2-item", "kind": "textField", "label": "英文单词 · vivid", "icon": null, "variant": "outlined" }] },
+    { "id": "cmeaning2", "x": 1000, "y": 422, "axis": "x", "items": [{ "id": "cmeaning2-item", "kind": "textField", "label": "中文释义 · 生动的", "icon": null, "variant": "outlined" }] },
+    { "id": "csave", "x": 1000, "y": 658, "axis": "x", "items": [{ "id": "csave-item", "kind": "button", "label": "保存为单词卡", "icon": "save", "variant": "filled", "size": 380, "action": { "to": "deck", "transition": "slide" }, "note": "只保存校对后的文字、创建时间和复习计划。" }] },
+
+    { "id": "dbar", "x": 1476, "y": 0, "axis": "x", "items": [{ "id": "dbar-item", "kind": "topAppBar", "label": "我的词库", "icon": null, "variant": "filled" }] },
+    { "id": "dsearch", "x": 1492, "y": 112, "axis": "x", "items": [{ "id": "dsearch-item", "kind": "searchBar", "label": "搜索单词或释义", "icon": "search", "variant": "filled" }] },
+    { "id": "dlist", "x": 1492, "y": 202, "axis": "y", "items": [{ "id": "dlist-1", "kind": "listItem", "label": "serendipity", "supporting": "意外的美好发现 · 明天复习", "icon": "auto_stories", "variant": "filled" }, { "id": "dlist-2", "kind": "listItem", "label": "vivid", "supporting": "生动的 · 今天复习", "icon": "auto_stories", "variant": "filled" }] },
+    { "id": "dadd", "x": 1818, "y": 706, "axis": "x", "items": [{ "id": "dadd-item", "kind": "fab", "label": "", "icon": "add", "variant": "filled", "note": "手动添加单词。" }] },
+    { "id": "dnav", "x": 1476, "y": 788, "axis": "x", "items": [{ "id": "dnav-item", "kind": "bottomNav", "label": "", "icon": null, "variant": "filled", "tabs": [{ "icon": "today", "label": "今日" }, { "icon": "document_scanner", "label": "扫描" }, { "icon": "auto_stories", "label": "词库" }], "selected": 2, "actions": { "tab:0": { "to": "home", "transition": "fade" }, "tab:1": { "to": "scan", "transition": "fade" } } }] },
+
+    { "id": "rbar", "x": 1968, "y": 0, "axis": "x", "items": [{ "id": "rbar-item", "kind": "topAppBar", "label": "开始复习", "icon": "arrow_back", "variant": "filled", "actions": { "icon": { "to": "home", "transition": "slide" } } }] },
+    { "id": "rprogress", "x": 1984, "y": 112, "axis": "x", "items": [{ "id": "rprogress-item", "kind": "linearProgress", "label": "", "icon": null, "variant": "filled", "value": 40, "wavy": true }] },
+    { "id": "rcard", "x": 1984, "y": 180, "axis": "x", "items": [{ "id": "rcard-item", "kind": "card", "label": "serendipity", "supporting": "先在心里想一想意思", "icon": "style", "variant": "filled", "noImage": true, "size": 380, "size2": 294 }] },
+    { "id": "rflip", "x": 1984, "y": 502, "axis": "x", "items": [{ "id": "rflip-item", "kind": "button", "label": "翻开答案", "icon": "flip", "variant": "filled", "size": 380, "note": "翻卡显示释义，然后评估记忆程度。" }] },
+    { "id": "rgrade", "x": 1984, "y": 586, "axis": "x", "items": [{ "id": "rgrade-1", "kind": "button", "label": "忘记", "icon": null, "variant": "tonal" }, { "id": "rgrade-2", "kind": "button", "label": "模糊", "icon": null, "variant": "tonal" }, { "id": "rgrade-3", "kind": "button", "label": "记得", "icon": null, "variant": "filled" }] },
+    { "id": "rnote", "x": 1984, "y": 686, "axis": "x", "items": [{ "id": "rnote-item", "kind": "text", "label": "根据你的反馈安排下次复习", "icon": null, "variant": "filled", "size": 18 }] }
+  ]
+}

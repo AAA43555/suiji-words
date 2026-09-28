@@ -1,0 +1,13 @@
+{
+  "name": "随记单词",
+  "short_name": "随记",
+  "description": "扫描手写单词本，随记随背",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f9fbf7",
+  "theme_color": "#e9f6f2",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
