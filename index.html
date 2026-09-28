@@ -41,7 +41,7 @@
         <div class="page-head"><span class="eyebrow">01 / 捕捉纸上的单词</span><h1 id="scan-heading">扫描单词本</h1><p>把字放在框内，保持光线充足。识别后可以逐条校对。</p></div>
         <div class="camera-panel">
           <video id="camera-video" autoplay muted playsinline></video>
-          <div class="camera-empty" id="camera-empty"><span class="camera-symbol">▧</span><strong>准备好就打开摄像头</strong><small>我们不会拍照或保存相片</small></div>
+          <div class="camera-empty" id="camera-empty"><span class="camera-symbol">▧</span><strong>准备好就打开摄像头</strong><small>单词、短语和例句都可以识别；不会保存相片</small></div>
           <div class="scan-guide" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
           <div class="camera-badge">仅在此设备识别</div>
         </div>
@@ -94,7 +94,7 @@
   <dialog id="word-dialog" class="word-dialog">
     <form id="word-form" method="dialog">
       <div class="dialog-head"><div><span class="eyebrow">随手记一词</span><h2 id="dialog-title">添加单词</h2></div><button type="button" class="icon-btn" id="close-dialog" aria-label="关闭">×</button></div>
-      <label>英文单词<input id="word-input" required autocomplete="off" autocapitalize="none" placeholder="serendipity"></label>
+          <label>英文单词 / 短语 / 例句<input id="word-input" required autocomplete="off" autocapitalize="none" placeholder="A little progress every day."></label>
       <label>中文释义<input id="meaning-input" autocomplete="off" placeholder="意外的美好发现"></label>
       <label>例句或笔记（可选）<textarea id="note-input" rows="3" placeholder="写下让你记住它的句子"></textarea></label>
       <div class="dialog-actions"><button type="button" class="delete-button" id="delete-word" hidden>删除卡片</button><button type="submit" class="primary-button">保存单词卡</button></div>

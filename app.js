@@ -1,4 +1,5 @@
 import { isDue, scheduleReview } from "./scheduler.mjs";
+import { entryType, parseOcrText, validEntry } from "./recognition.mjs";
 
 const STORAGE_KEY = "suiji-words-v1";
 const pages = new Set(["home", "scan", "confirm", "deck", "study", "settings"]);
@@ -99,7 +100,7 @@ function renderDeck() {
     const word = document.createElement("strong");
     word.textContent = card.word;
     const detail = document.createElement("small");
-    detail.textContent = `${card.meaning || "待添加释义"} · ${formatDue(card)}`;
+    detail.textContent = `${entryType(card.word)} · ${card.meaning || "待添加释义"} · ${formatDue(card)}`;
     content.append(word, detail);
     const arrow = document.createElement("span");
     arrow.className = "word-row-arrow";
@@ -138,20 +139,6 @@ function openWordDialog(card = null) {
   setTimeout(() => $("#word-input").focus(), 30);
 }
 
-function parseOcrText(text) {
-  const lines = text.split(/\r?\n/).map(line => line.replace(/[|•·]/g, " ").trim()).filter(Boolean);
-  const result = [];
-  for (const line of lines) {
-    const match = line.match(/^\s*(?:\d+[.)、]\s*)?([A-Za-z][A-Za-z'-]{1,39})(?:\s*[-—:：]\s*|\s+)?(.*)$/);
-    if (!match) continue;
-    const word = match[1].replace(/^['-]|['-]$/g, "");
-    const meaning = match[2].trim();
-    if (word.length < 2 || /^(page|date|unit|word|meaning)$/i.test(word)) continue;
-    result.push({ word, meaning });
-  }
-  return result.slice(0, 40);
-}
-
 function renderCandidates() {
   $("#result-count").textContent = `${state.candidates.length} 个候选词`;
   const list = $("#results-list");
@@ -176,7 +163,7 @@ function renderCandidates() {
     remove.addEventListener("click", () => { state.candidates.splice(index, 1); renderCandidates(); });
     head.append(number, remove);
     const wordLabel = document.createElement("label");
-    wordLabel.textContent = "英文单词";
+    wordLabel.textContent = "英文单词 / 短语 / 例句";
     const wordInput = document.createElement("input");
     wordInput.value = candidate.word;
     wordInput.placeholder = "请填写英文单词";
@@ -310,6 +297,7 @@ function renderStudy() {
   $("#study-progress-text").textContent = `第 ${state.studyDone + 1} / ${state.studyTotal} 张`;
   $("#study-progress-fill").style.width = `${Math.round(state.studyDone / state.studyTotal * 100)}%`;
   $("#flashcard-word").textContent = card.word;
+  $("#flashcard-word").classList.toggle("long-text", card.word.length > 42);
   $("#flashcard-hint").textContent = state.flipped ? (card.meaning || "还没有释义，去词库补充吧") + (card.note ? `\n${card.note}` : "") : "轻点下方按钮查看释义";
   $("#flashcard-hint").style.whiteSpace = "pre-line";
   $("#flashcard").classList.toggle("flipped", state.flipped);
@@ -349,7 +337,7 @@ async function importData(file) {
     const existing = new Set(state.cards.map(card => card.word.trim().toLocaleLowerCase()));
     let added = 0;
     for (const row of data.cards.slice(0, 10000)) {
-      if (!row || typeof row.word !== "string" || !row.word.trim() || row.word.length > 80) continue;
+      if (!row || typeof row.word !== "string" || !validEntry(row.word)) continue;
       const key = row.word.trim().toLocaleLowerCase();
       if (existing.has(key)) continue;
       const card = makeCard(row.word, typeof row.meaning === "string" ? row.meaning : "", typeof row.note === "string" ? row.note : "");
@@ -384,7 +372,7 @@ $("#save-results").addEventListener("click", () => {
   let invalid = 0;
   for (const row of state.candidates) {
     const word = row.word.trim();
-    if (!/^[A-Za-z][A-Za-z' -]{1,79}$/.test(word)) { invalid++; continue; }
+    if (!validEntry(word)) { invalid++; continue; }
     const key = word.toLocaleLowerCase();
     if (existing.has(key)) continue;
     state.cards.push(makeCard(word, row.meaning));
@@ -403,7 +391,7 @@ $("#close-dialog").addEventListener("click", () => $("#word-dialog").close());
 $("#word-form").addEventListener("submit", event => {
   event.preventDefault();
   const word = $("#word-input").value.trim();
-  if (!/^[A-Za-z][A-Za-z' -]{1,79}$/.test(word)) { toast("请输入有效的英文单词"); return; }
+  if (!validEntry(word)) { toast("请输入英文单词、短语或例句"); return; }
   const duplicate = state.cards.find(card => card.id !== state.editingId && card.word.toLocaleLowerCase() === word.toLocaleLowerCase());
   if (duplicate) { toast("这个单词已在词库里"); return; }
   const card = state.cards.find(item => item.id === state.editingId);

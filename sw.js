@@ -1,5 +1,5 @@
-const CACHE_NAME = "suiji-shell-v1";
-const SHELL = ["./", "./index.html", "./style.css", "./app.js", "./scheduler.mjs", "./icon.svg", "./manifest.webmanifest"];
+const CACHE_NAME = "suiji-shell-v2";
+const SHELL = ["./", "./index.html", "./style.css", "./app.js", "./scheduler.mjs", "./recognition.mjs", "./icon.svg", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)));

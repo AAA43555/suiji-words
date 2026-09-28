@@ -1,6 +1,6 @@
 {
   "title": "随记单词",
-  "brief": "用手机摄像头识别手写单词本，校对后生成单词卡，并按间隔复习。扫描帧只在浏览器内存中处理，不保存到相册。",
+  "brief": "用手机摄像头识别手写单词、短语和例句，校对后生成卡片，并按间隔复习。扫描帧只在浏览器内存中处理，不保存到相册。",
   "frame": "phone",
   "platform": "web",
   "paletteKey": "teal",
@@ -8,7 +8,7 @@
   "frames": [
     { "id": "home", "name": "今日", "x": 0, "y": 0, "note": "展示今日待复习数量与扫描入口，提示数据只保存在本机浏览器。" },
     { "id": "scan", "name": "扫描单词本", "x": 492, "y": 0, "note": "调用网页实时摄像头，仅提取当前画面帧做本地识别，不创建相册照片。" },
-    { "id": "confirm", "name": "校对识别结果", "x": 984, "y": 0, "note": "逐条修改英文单词和中文释义，确认后才加入词库。" },
+    { "id": "confirm", "name": "校对识别结果", "x": 984, "y": 0, "note": "逐条修改英文单词、短语或例句及中文释义，确认后才加入词库。" },
     { "id": "deck", "name": "我的词库", "x": 1476, "y": 0, "note": "搜索、编辑和管理已保存的单词卡。" },
     { "id": "study", "name": "开始复习", "x": 1968, "y": 0, "note": "先回忆再翻卡，按忘记、模糊、记得安排下次复习。" }
   ],
@@ -28,9 +28,9 @@
 
     { "id": "cbar", "x": 984, "y": 0, "axis": "x", "items": [{ "id": "cbar-item", "kind": "topAppBar", "label": "校对识别结果", "icon": "arrow_back", "variant": "filled", "actions": { "icon": { "to": "scan", "transition": "slide" } } }] },
     { "id": "ctip", "x": 1000, "y": 110, "axis": "x", "items": [{ "id": "ctip-item", "kind": "text", "label": "确认每个单词，再加入词库", "icon": null, "variant": "filled", "size": 22, "bold": true }] },
-    { "id": "cword1", "x": 1000, "y": 178, "axis": "x", "items": [{ "id": "cword1-item", "kind": "textField", "label": "英文单词 · serendipity", "icon": null, "variant": "outlined" }] },
+    { "id": "cword1", "x": 1000, "y": 178, "axis": "x", "items": [{ "id": "cword1-item", "kind": "textField", "label": "单词或例句 · serendipity", "icon": null, "variant": "outlined" }] },
     { "id": "cmeaning1", "x": 1000, "y": 252, "axis": "x", "items": [{ "id": "cmeaning1-item", "kind": "textField", "label": "中文释义 · 意外的美好发现", "icon": null, "variant": "outlined" }] },
-    { "id": "cword2", "x": 1000, "y": 348, "axis": "x", "items": [{ "id": "cword2-item", "kind": "textField", "label": "英文单词 · vivid", "icon": null, "variant": "outlined" }] },
+    { "id": "cword2", "x": 1000, "y": 348, "axis": "x", "items": [{ "id": "cword2-item", "kind": "textField", "label": "单词或例句 · A little progress every day.", "icon": null, "variant": "outlined" }] },
     { "id": "cmeaning2", "x": 1000, "y": 422, "axis": "x", "items": [{ "id": "cmeaning2-item", "kind": "textField", "label": "中文释义 · 生动的", "icon": null, "variant": "outlined" }] },
     { "id": "csave", "x": 1000, "y": 658, "axis": "x", "items": [{ "id": "csave-item", "kind": "button", "label": "保存为单词卡", "icon": "save", "variant": "filled", "size": 380, "action": { "to": "deck", "transition": "slide" }, "note": "只保存校对后的文字、创建时间和复习计划。" }] },
 
